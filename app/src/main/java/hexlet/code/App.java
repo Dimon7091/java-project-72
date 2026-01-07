@@ -21,12 +21,9 @@ public class App {
     }
 
     public static Javalin getApp() {
-        var codeResolver   = new ResourceCodeResolver("templates");
-        var templateEngine = TemplateEngine.create(codeResolver, ContentType.Html);
-
         var app = Javalin.create(config -> {
             config.bundledPlugins.enableDevLogging();
-            config.fileRenderer(new JavalinJte(templateEngine));
+            config.fileRenderer(new JavalinJte(createTemplateEngine()));
             config.staticFiles.add("static", Location.CLASSPATH);
         });
 
@@ -35,7 +32,26 @@ public class App {
             ctx.render("index.jte");
         });
 
-        app.start(DataBaseConfig.getPort());
+        app.start(getPort());
         return app;
+    }
+
+    private static TemplateEngine createTemplateEngine() {
+        ClassLoader classLoader = App.class.getClassLoader();
+        ResourceCodeResolver codeResolver = new ResourceCodeResolver("templates", classLoader);
+        return TemplateEngine.create(codeResolver, ContentType.Html);
+    }
+
+    public static int getPort() {
+        // 1. JVM property (из Dockerfile)
+        String propPort = System.getProperty("server.port");
+        if (propPort != null) return Integer.parseInt(propPort);
+
+        // 2. ENV PORT
+        String envPort = System.getenv("PORT");
+        if (envPort != null) return Integer.parseInt(envPort);
+
+        // 3. Дефолт
+        return 8080;
     }
 }

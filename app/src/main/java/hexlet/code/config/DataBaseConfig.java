@@ -57,13 +57,26 @@ public class DataBaseConfig {
     }
 
     static String getUrl() {
-        var url = System.getenv("JDBC_DATABASE_URL");
-        // Подключение локальной базы данных если ссылка не найдена
-        if (url != null) {
-            log.info("✅ Database env var found");
-            return "jdbc:" + url;
+        var url = System.getenv("JDBC_DATABASE_URL"); // Render DATABASE_URL
+        if (url != null && url.contains("postgresql")) {
+            // Парсим Render URL: postgresql://user:pass@host/db
+            String cleanUrl = url.replace("postgresql://", "");
+            String[] parts = cleanUrl.split("@");
+            String credentials = parts[0];  // user:pass
+            String hostDb = parts[1];       // host/db
+
+            String[] credParts = credentials.split(":", 2);
+            String user = credParts[0];
+            String password = credParts[1];
+
+            String[] hostDbParts = hostDb.split("/", 2);
+            String host = hostDbParts[0];
+            String database = hostDbParts[1];
+
+            // Формируем JDBC URL
+            return String.format("jdbc:postgresql://%s:5432/%s?user=%s&password=%s",
+                    host, database, user, password);
         }
-        log.info("❎ Database env var not found!");
         return "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;";
     }
 
@@ -74,18 +87,5 @@ public class DataBaseConfig {
         }
         return new BufferedReader(new InputStreamReader(urlStream))
                 .lines().collect(Collectors.joining("\n"));
-    }
-
-    public static int getPort() {
-        // 1. JVM property (из Dockerfile)
-        String propPort = System.getProperty("server.port");
-        if (propPort != null) return Integer.parseInt(propPort);
-
-        // 2. ENV PORT
-        String envPort = System.getenv("PORT");
-        if (envPort != null) return Integer.parseInt(envPort);
-
-        // 3. Дефолт
-        return 8080;
     }
 }
