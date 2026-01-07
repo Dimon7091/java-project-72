@@ -1,5 +1,8 @@
 package hexlet.code;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
@@ -13,8 +16,8 @@ import org.slf4j.Logger;
 public class App {
     private static final Logger log = LoggerFactory.getLogger(App.class);
     public static void main(String[] args) {
-        getApp();
         DataBaseConfig.init();
+        getApp();
     }
 
     public static Javalin getApp() {
@@ -31,9 +34,8 @@ public class App {
         app.get("/", ctx -> {
             ctx.render("index.jte");
         });
-        var port = DataBaseConfig.getPort();
-        app.start(port);
+
+        app.start(DataBaseConfig.getPort());
         return app;
     }
-
 }

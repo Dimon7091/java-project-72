@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class DataBaseConfig {
-    private static final Logger log = LoggerFactory.getLogger(DataBaseConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(DataBaseConfig.class.getName());
 
     public static void init() {
         var hikariConfig = new HikariConfig();
