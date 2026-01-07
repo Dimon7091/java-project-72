@@ -3,6 +3,7 @@ package hexlet.code;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
+import hexlet.code.config.DataBaseConfig;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import io.javalin.rendering.template.JavalinJte;
@@ -13,6 +14,7 @@ public class App {
     private static final Logger log = LoggerFactory.getLogger(App.class);
     public static void main(String[] args) {
         getApp();
+        DataBaseConfig.init();
     }
 
     public static Javalin getApp() {
@@ -25,24 +27,13 @@ public class App {
             config.staticFiles.add("static", Location.CLASSPATH);
         });
 
+
         app.get("/", ctx -> {
             ctx.render("index.jte");
         });
-        var port = getPort();
+        var port = DataBaseConfig.getPort();
         app.start(port);
         return app;
     }
 
-    private static int getPort() {
-        // 1. JVM property (из Dockerfile)
-        String propPort = System.getProperty("server.port");
-        if (propPort != null) return Integer.parseInt(propPort);
-
-        // 2. ENV PORT
-        String envPort = System.getenv("PORT");
-        if (envPort != null) return Integer.parseInt(envPort);
-
-        // 3. Дефолт
-        return 8080;
-    }
 }
