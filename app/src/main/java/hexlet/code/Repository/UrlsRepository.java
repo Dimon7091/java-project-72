@@ -1,0 +1,114 @@
+package hexlet.code.Repository;
+
+import hexlet.code.models.Url;
+
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
+import static hexlet.code.Repository.BaseRepository.dataSource;
+
+public class UrlsRepository {
+    public static void save(Url url) {
+        var sql = "INSERT INTO urls (name) VALUES (?)";
+        if (url.getId() == null) {
+            try (var connection = dataSource.getConnection();
+                 var preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                preparedStatement.setString(1, url.getName());
+                preparedStatement.executeUpdate();
+
+                var generatedKey = preparedStatement.getGeneratedKeys();
+                if (generatedKey.next()) {
+                    url.setId(generatedKey.getLong(1));
+                } else {
+                    System.out.println("DB have not returned an id after saving an entity");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try (var connection = dataSource.getConnection();
+                 var preparedStatement = connection.prepareStatement(sql)) {
+                preparedStatement.setString(1, url.getName());
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public static Optional<Url> findById(Long urlId) {
+        var sql = "SELECT * FROM urls WHERE id = ?";
+        try (var connection = dataSource.getConnection();
+             var preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setLong(1, urlId);
+
+            var result = preparedStatement.executeQuery();
+            if (result.next()) {
+                var id = result.getLong("id");
+                var name = result.getString("name");
+                LocalDateTime createdAt = result.getObject("created_at", LocalDateTime.class);
+                var url = new Url(name);
+                url.setId(id);
+                url.setCreatedAt(createdAt);
+
+                return Optional.of(url);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return Optional.empty();
+    }
+
+    public static Optional<Url> findByName(String urlName) {
+        var sql = "SELECT * FROM urls WHERE name = ?";
+        try (var connection = dataSource.getConnection();
+             var preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setString(1, urlName);
+            var result = preparedStatement.executeQuery();
+            if (result.next()) {
+                var id = result.getLong(1);
+                var name = result.getString("name");
+                LocalDateTime createdAt = result.getObject("created_at", LocalDateTime.class);
+                var url = new Url(name);
+                url.setId(id);
+                url.setCreatedAt(createdAt);
+
+                return Optional.of(url);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return Optional.empty();
+    }
+
+
+    public static Optional<List<Url>> getEntities() {
+        var sql = "SELECT * FROM urls";
+        try (var connection = dataSource.getConnection();
+             var preparedStatement = connection.prepareStatement(sql);
+             var result = preparedStatement.executeQuery()) {
+
+            List<Url> urlList = new LinkedList<>();
+            while (result.next()) {
+                var id = result.getLong("id");
+                var name = result.getString("name");
+                LocalDateTime createdAt = result.getObject("created_at", LocalDateTime.class);
+                var url = new Url(name);
+                url.setId(id);
+                url.setCreatedAt(createdAt);
+                urlList.add(url);
+            }
+            if (urlList.isEmpty()) {
+                return Optional.empty();
+            }
+            return Optional.of(urlList);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}

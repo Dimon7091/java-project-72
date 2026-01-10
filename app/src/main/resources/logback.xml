@@ -1,10 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!-- ✅ ЦВЕТНОЙ CONSOLE APPENDER -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
+    <!-- Ваши логгеры -->
     <logger name="hexlet.code.config.DataBaseConfig" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
@@ -14,9 +17,9 @@
     <logger name="com.zaxxer.hikari" level="WARN"/>
     <logger name="com.zaxxer.hikari.pool.HikariPool" level="ERROR"/>
 
-    <!-- ✅ ИСПРАВЛЕНО: INFO вместо WARN -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
+
 

@@ -6,6 +6,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
+import hexlet.code.Controllers.UrlController;
 import hexlet.code.config.DataBaseConfig;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
@@ -31,6 +32,10 @@ public class App {
         app.get("/", ctx -> {
             ctx.render("index.jte");
         });
+        app.post("/urls", UrlController::add);
+        app.get("/urls", UrlController::index);
+        app.get("/urls/{id}", UrlController::show);
+
 
         app.start(getPort());
         return app;
