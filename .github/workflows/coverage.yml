@@ -1,5 +1,4 @@
 name: Java CI with JaCoCo Coverage
-
 on:
   push:
     branches: [ main, develop ]
@@ -13,7 +12,10 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+    defaults:           # ← 2 пробела отступ!
+      run:
+        working-directory: ./app  # ← 4 пробела отступ!
+        
     steps:
     - uses: actions/checkout@v4
     
@@ -26,45 +28,19 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
       
-    - name: Cache Gradle packages
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-          
     - name: Run tests with coverage
       run: ./gradlew clean test jacocoTestReport
       
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
-        files: ./build/reports/jacoco/test/jacocoTestReport.xml
-        fail_ci_if_error: true
-        
-    - name: JaCoCo Badge Generator
-      uses: cicirello/jacoco-badge-generator@v2
-      with:
-        generate-branches-badge: true
-        jacoco-csv-file-name: build/reports/jacoco/test/jacocoTestReport.csv
-        badges-directory: generated-badge
-        
-    - name: Verify badge file
-      run: ls -la generated-badge/
-      
-    - name: Log coverage percentages to stdout
-      run: |
-        ./gradlew jacocoTestReport
-        cat build/reports/jacoco/test/jacocoTestReport.xml | grep -oP '(?<=counter="INSTRUCTION"[^>]*covered=")\d+(?=")'
+        files: ./app/build/reports/jacoco/test/jacocoTestReport.xml
         
     - name: Upload test results
-      uses: actions/upload-artifact@v4
       if: always()
+      uses: actions/upload-artifact@v4
       with:
         name: test-results
         path: |
-          build/reports/tests/test/
-          build/reports/jacoco/
+          app/build/reports/jacoco/**
+          app/build/reports/tests/**
