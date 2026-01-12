@@ -1,45 +1,47 @@
 package hexlet.code.Controllers;
 
 import hexlet.code.Repository.UrlsRepository;
+import hexlet.code.Services.UrlService;
 import hexlet.code.models.Url;
 import hexlet.code.models.viewModels.UrlPage;
 import hexlet.code.models.viewModels.UrlsPage;
+import hexlet.code.utils.Result;
+import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Context;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
+import static hexlet.code.utils.UrlValidator.validateUrl;
 import static io.javalin.rendering.template.TemplateUtil.model;
 
 public class UrlController extends BaseController{
-    public static void add(Context ctx) {
-        var getFormUrl = ctx.formParam("url");
+    private final UrlService urlService;
 
-        if (getFormUrl != null) {
-            try {
-                var uri = new URI(getFormUrl);
-                String baseUrl = uri.getScheme() + "://" + uri.getHost();
-                System.out.println("✅ Базовый URL: " + baseUrl);
-                if (UrlsRepository.findByName(baseUrl).isPresent()) {
-                    ctx.sessionAttribute("flash" , Map.of("status", "alert-info", "message", "Страница уже существуе"));
-                    ctx.redirect("/urls");
-                    return;
-                }
-                var url = new Url(baseUrl);
-                UrlsRepository.save(url);
-                ctx.sessionAttribute("flash" , Map.of("status", "alert-success", "message", "Страница успешно добавлена"));
-                ctx.redirect("/urls");
-            } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        }
+    public UrlController(UrlsRepository urlsRepository) {
+        this.urlService = new UrlService(urlsRepository);
     }
 
-    public static void index(Context ctx) {
-        Optional<List<Url>> OptUrls = UrlsRepository.getEntities();
+    public void add(Context ctx) {
+        String rawUrl = ctx.formParam("url");
+
+        if (rawUrl == null || rawUrl.trim().isEmpty()) {
+            ctx.sessionAttribute("flash", Map.of("status", "alert-warning", "message", "Ссылка обязательна"));
+            ctx.redirect("/urls");
+            return;
+        }
+
+        Result<Url> result = urlService.createUrl(rawUrl);
+        Map<String, String> message = (result.isSuccess() ?
+                Map.of("status", "alert-success", "message", result.getMessage()) :
+                Map.of("status", "alert-danger", "message", result.getMessage()));
+        ctx.sessionAttribute("flash", message);
+        ctx.redirect("/urls");
+    }
+
+    public void index(Context ctx) {
+        Optional<List<Url>> OptUrls = urlService.getAllUrls();
         var page = new UrlsPage(null);
         if (OptUrls.isPresent()) {
             page = new UrlsPage(OptUrls.get());
@@ -48,9 +50,9 @@ public class UrlController extends BaseController{
         ctx.render("urls/indexUrls.jte", model("page", page));
     }
 
-    public static void show(Context ctx) {
+    public void show(Context ctx) {
         Long id = ctx.pathParamAsClass("id", Long.class).get();
-        var OptUrl = UrlsRepository.findById(id);
+        var OptUrl = urlService.getUrlById(id);
         if (OptUrl.isPresent()) {
             var page = new UrlPage(OptUrl.get());
             ctx.render("urls/showUrl.jte", model("page", page));

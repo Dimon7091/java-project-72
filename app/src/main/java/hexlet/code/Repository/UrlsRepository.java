@@ -13,7 +13,7 @@ import java.util.Optional;
 import static hexlet.code.Repository.BaseRepository.dataSource;
 
 public class UrlsRepository {
-    public static void save(Url url) {
+    public void save(Url url) {
         var sql = "INSERT INTO urls (name) VALUES (?)";
         if (url.getId() == null) {
             try (var connection = dataSource.getConnection();
@@ -41,7 +41,7 @@ public class UrlsRepository {
         }
     }
 
-    public static Optional<Url> findById(Long urlId) {
+    public Optional<Url> findById(Long urlId) {
         var sql = "SELECT * FROM urls WHERE id = ?";
         try (var connection = dataSource.getConnection();
              var preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -64,7 +64,7 @@ public class UrlsRepository {
         return Optional.empty();
     }
 
-    public static Optional<Url> findByName(String urlName) {
+    public Optional<Url> findByName(String urlName) {
         var sql = "SELECT * FROM urls WHERE name = ?";
         try (var connection = dataSource.getConnection();
              var preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -87,7 +87,7 @@ public class UrlsRepository {
     }
 
 
-    public static Optional<List<Url>> getEntities() {
+    public Optional<List<Url>> getEntities() {
         var sql = "SELECT * FROM urls";
         try (var connection = dataSource.getConnection();
              var preparedStatement = connection.prepareStatement(sql);

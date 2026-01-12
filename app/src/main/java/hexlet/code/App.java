@@ -7,6 +7,7 @@ import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
 import hexlet.code.Controllers.UrlController;
+import hexlet.code.Repository.UrlsRepository;
 import hexlet.code.config.DataBaseConfig;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
@@ -32,16 +33,20 @@ public class App {
         app.get("/", ctx -> {
             ctx.render("index.jte");
         });
-        app.post("/urls", UrlController::add);
-        app.get("/urls", UrlController::index);
-        app.get("/urls/{id}", UrlController::show);
+
+        UrlsRepository urlsRepository = new UrlsRepository();
+        UrlController urlController = new UrlController(urlsRepository);
+
+        app.post("/urls", urlController::add);
+        app.get("/urls", urlController::index);
+        app.get("/urls/{id}", urlController::show);
 
 
         app.start(getPort());
         return app;
     }
 
-    private static TemplateEngine createTemplateEngine() {
+    public static TemplateEngine createTemplateEngine() {
         ClassLoader classLoader = App.class.getClassLoader();
         ResourceCodeResolver codeResolver = new ResourceCodeResolver("templates", classLoader);
         return TemplateEngine.create(codeResolver, ContentType.Html);

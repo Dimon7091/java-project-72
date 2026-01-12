@@ -9,7 +9,7 @@ content = @`
     <section>
         <div class="container-xl mt-5">
             <div class="title">
-                <h1>Сайт:</h1>
+                <h1>Сайт: ${page.getUrl().getName()}</h1>
             </div>
             <table class="table table-bordered table-hover">
                 <tbody>
