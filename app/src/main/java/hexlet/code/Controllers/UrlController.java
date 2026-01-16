@@ -79,18 +79,26 @@ public class UrlController extends BaseController{
     }
 
     public void check(Context ctx) {
-        String url = ctx.formParam("urlName");
+        String url = ctx.formParam("name");
         Long urlId = ctx.pathParamAsClass("id", Long.class).get();
         String htmlBody = "";
         int statusCode = 0;
 
+        if (url == null || url.trim().isEmpty()) {
+            Map<String, String> error = Map.of("status", "alert-danger", "message", "URL не может быть пустым");
+            ctx.sessionAttribute("flash", error);
+            ctx.redirect("/urls/" + urlId);
+            return;
+        }
+
         try {
-            HttpResponse<String> response = Unirest.get(url)
-                    .asString();
+            HttpResponse<String> response = Unirest.get(url).asString();
             statusCode = response.getStatus();
-            htmlBody = response.getBody();
+            htmlBody = response.getBody(); // Может быть ""
         } catch (UnirestException e) {
-            log.error("Ошибка запроса");
+            log.warn("Не удалось достучаться до {}: {}", url, e.getMessage());
+            statusCode = 0;
+            htmlBody = ""; // ✅ Явно пустая строка!
         }
 
         Result<UrlCheck> result = urlService.createUrlCheck(htmlBody, statusCode, urlId);
