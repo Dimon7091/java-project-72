@@ -42,18 +42,21 @@ public class UrlService {
     }
 
     public Result<UrlCheck> createUrlCheck(String htmlBody, Integer statusCode, Long urlId) {
-        if (htmlBody == null) {
-            return Result.failure("Не удалось проверить страницу");
-        }
+        // ✅ Пустая htmlBody = нормальная ситуация (сервер недоступен)
+        Document doc = Jsoup.parse(htmlBody != null ? htmlBody : "");
 
-        Document doc = Jsoup.parse(htmlBody);
-        String title = doc.title();
-        String h1 = Objects.requireNonNull(doc.selectFirst("h1")).text();
-        String description = doc.select("meta[name=description]").attr("content");
+        String title = doc.title(); // ""
+        String h1 = Optional.ofNullable(doc.selectFirst("h1"))
+                .map(el -> el.text())
+                .orElse(""); // ✅ Пустая строка вместо null!
+
+        String description = doc.selectFirst("meta[name=description]")
+                .attr("content"); // ""
 
         UrlCheck urlCheck = new UrlCheck(statusCode, title, h1, description, urlId);
         urlChecksRepository.save(urlCheck);
-        return Result.success(urlCheck, "Страница успешно проверенна");
+
+        return Result.success(urlCheck, "Страница успешно проверена");
     }
 
     public Optional<List<Url>> getAllUrls() {
