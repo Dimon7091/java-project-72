@@ -16,6 +16,8 @@ import io.javalin.rendering.template.JavalinJte;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
+import java.util.Random;
+
 public class App {
     private static final Logger log = LoggerFactory.getLogger(App.class);
     public static void main(String[] args) {
@@ -64,6 +66,6 @@ public class App {
         if (envPort != null) return Integer.parseInt(envPort);
 
         // 3. Дефолт
-        return 8080;
+        return 8000 + new Random().nextInt(1000);
     }
 }
