@@ -28,7 +28,7 @@ content = @`
             </div>
             <form class="check-form" method="post" action="/urls/${page.getUrl().getId()}/checks">
                 <button type="submit" class="btn btn-primary">Запустить проверку</button>
-                <input type="hidden" name="urlName" value="${page.getUrl().getName()}">
+                <input type="hidden" name="name" value="${page.getUrl().getName()}">
             </form>
 
             <!-- 🔥 Vue ТОЛЬКО для tbody -->

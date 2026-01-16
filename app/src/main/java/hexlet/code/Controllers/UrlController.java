@@ -79,10 +79,17 @@ public class UrlController extends BaseController{
     }
 
     public void check(Context ctx) {
-        String url = ctx.formParam("urlName");
+        String url = ctx.formParam("name");
         Long urlId = ctx.pathParamAsClass("id", Long.class).get();
         String htmlBody = "";
         int statusCode = 0;
+
+        if (url == null || url.trim().isEmpty()) {
+            Map<String, String> error = Map.of("status", "alert-danger", "message", "URL не может быть пустым");
+            ctx.sessionAttribute("flash", error);
+            ctx.redirect("/urls/" + urlId);
+            return;
+        }
 
         try {
             HttpResponse<String> response = Unirest.get(url)
