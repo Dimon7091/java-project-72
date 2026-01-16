@@ -1,5 +1,6 @@
 import hexlet.code.App;
 import hexlet.code.Controllers.UrlController;
+import hexlet.code.Repository.UrlChecksRepository;
 import hexlet.code.Repository.UrlsRepository;
 import hexlet.code.Services.UrlService;
 import hexlet.code.models.Url;
@@ -35,6 +36,9 @@ public class UrlControllerTest {
     private UrlsRepository urlsRepository;
 
     @Mock
+    private UrlChecksRepository urlChecksRepository;
+
+    @Mock
     private Context ctx;
 
     @Mock
@@ -51,7 +55,7 @@ public class UrlControllerTest {
     @BeforeEach
     void setUp() {
         // Создаем spy для urlService чтобы можно было мокать его методы
-        urlController = new UrlController(urlsRepository);
+        urlController = new UrlController(urlsRepository, urlChecksRepository);
         // Используем reflection для замены service на mock
         try {
             var field = UrlController.class.getDeclaredField("urlService");

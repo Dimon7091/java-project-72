@@ -45,6 +45,10 @@ dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
     testImplementation("org.assertj:assertj-core:3.22.0")
+
+    implementation("com.konghq:unirest-java:3.14.0")
+
+    implementation("org.jsoup:jsoup:1.22.1")
 }
 
 

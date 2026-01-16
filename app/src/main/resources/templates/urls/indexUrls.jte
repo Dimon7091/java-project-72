@@ -27,8 +27,8 @@ content = @`
                         <tr>
                             <th scope="row">${url.getId()}</th>
                             <td><a href="/urls/${url.getId()}">${url.getName()}</a></td>
-                            <td></td>
-                            <td></td>
+                            <td>${url.getLastCheck()}</td>
+                            <td>${url.getStatusCode()}</td>
                         </tr>
 
                     @endfor

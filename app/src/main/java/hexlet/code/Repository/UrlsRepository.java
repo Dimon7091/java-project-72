@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -52,9 +53,12 @@ public class UrlsRepository {
                 var id = result.getLong("id");
                 var name = result.getString("name");
                 LocalDateTime createdAt = result.getObject("created_at", LocalDateTime.class);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                String formattedDate = createdAt.format(formatter);
+
                 var url = new Url(name);
                 url.setId(id);
-                url.setCreatedAt(createdAt);
+                url.setCreatedAt(formattedDate);
 
                 return Optional.of(url);
             }
@@ -74,9 +78,12 @@ public class UrlsRepository {
                 var id = result.getLong(1);
                 var name = result.getString("name");
                 LocalDateTime createdAt = result.getObject("created_at", LocalDateTime.class);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                String formattedDate = createdAt.format(formatter);
+
                 var url = new Url(name);
                 url.setId(id);
-                url.setCreatedAt(createdAt);
+                url.setCreatedAt(formattedDate);
 
                 return Optional.of(url);
             }
@@ -98,9 +105,12 @@ public class UrlsRepository {
                 var id = result.getLong("id");
                 var name = result.getString("name");
                 LocalDateTime createdAt = result.getObject("created_at", LocalDateTime.class);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+                String formattedDate = createdAt.format(formatter);
+
                 var url = new Url(name);
                 url.setId(id);
-                url.setCreatedAt(createdAt);
+                url.setCreatedAt(formattedDate);
                 urlList.add(url);
             }
             if (urlList.isEmpty()) {

@@ -12,8 +12,7 @@
     <title>Учебный проект</title>
     <!-- ПРОВЕРЬТЕ ЭТО -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-
-
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 
 <body class="d-flex flex-column min-vh-100">

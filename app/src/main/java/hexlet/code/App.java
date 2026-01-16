@@ -7,6 +7,7 @@ import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
 import hexlet.code.Controllers.UrlController;
+import hexlet.code.Repository.UrlChecksRepository;
 import hexlet.code.Repository.UrlsRepository;
 import hexlet.code.config.DataBaseConfig;
 import io.javalin.Javalin;
@@ -35,12 +36,13 @@ public class App {
         });
 
         UrlsRepository urlsRepository = new UrlsRepository();
-        UrlController urlController = new UrlController(urlsRepository);
+        UrlChecksRepository urlChecksRepository = new UrlChecksRepository();
+        UrlController urlController = new UrlController(urlsRepository, urlChecksRepository);
 
         app.post("/urls", urlController::add);
         app.get("/urls", urlController::index);
         app.get("/urls/{id}", urlController::show);
-
+        app.post("urls/{id}/checks", urlController::check);
 
         app.start(getPort());
         return app;

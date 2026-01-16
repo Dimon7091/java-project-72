@@ -1,19 +1,27 @@
 package hexlet.code.Services;
 
+import hexlet.code.Repository.UrlChecksRepository;
 import hexlet.code.Repository.UrlsRepository;
 import hexlet.code.models.Url;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+
+import hexlet.code.models.UrlCheck;
 import hexlet.code.utils.Result;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 public class UrlService {
     private final UrlsRepository urlsRepository;
-
-    public UrlService(UrlsRepository urlsRepository) {
+    private final UrlChecksRepository urlChecksRepository;
+    public UrlService(UrlsRepository urlsRepository, UrlChecksRepository urlChecksRepository) {
         this.urlsRepository = urlsRepository;
+        this.urlChecksRepository = urlChecksRepository;
     }
 
     public Result<Url> createUrl(String rawUrl) {
@@ -33,12 +41,43 @@ public class UrlService {
         return Result.success(url, "Страница успешно добавлена");
     }
 
+    public Result<UrlCheck> createUrlCheck(String htmlBody, Integer statusCode, Long urlId) {
+        if (htmlBody == null) {
+            return Result.failure("Не удалось проверить страницу");
+        }
+
+        Document doc = Jsoup.parse(htmlBody);
+        String title = doc.title();
+        String h1 = Objects.requireNonNull(doc.selectFirst("h1")).text();
+        String description = doc.select("meta[name=description]").attr("content");
+
+        UrlCheck urlCheck = new UrlCheck(statusCode, title, h1, description, urlId);
+        urlChecksRepository.save(urlCheck);
+        return Result.success(urlCheck, "Страница успешно проверенна");
+    }
+
     public Optional<List<Url>> getAllUrls() {
-        return urlsRepository.getEntities();
+        var OptUrls = urlsRepository.getEntities();
+        OptUrls.ifPresent(urls -> urls
+                .forEach(url -> {
+                    var urlId = url.getId();
+                    var check = urlChecksRepository.findLastCheckByUrlId(urlId);
+                    if (check.isPresent()) {
+                        var lastCheck = check.get().getCreatedAt();
+                        var statusCode = check.get().getStatusCode();
+                        url.setLastCheck(lastCheck);
+                        url.setStatusCode(statusCode);
+                    }
+                }));
+        return OptUrls;
     }
 
     public Optional<Url> getUrlById(Long id) {
         return urlsRepository.findById(id);
+    }
+
+    public Optional<List<UrlCheck>> getUrlChecks(Long urlId) {
+        return urlChecksRepository.findEntitiesByUrlId(urlId);
     }
 
     public Optional<Url> getUrlByName(String name) {
@@ -51,7 +90,7 @@ public class UrlService {
             if (uri.getScheme() == null || uri.getHost() == null) {
                 return null;
             }
-            return uri.getScheme() + "://" + uri.getHost();
+            return (uri.getPort() == -1) ? uri.getScheme() + "://" + uri.getHost() : uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
         } catch (URISyntaxException e) {
             return null;
         }
