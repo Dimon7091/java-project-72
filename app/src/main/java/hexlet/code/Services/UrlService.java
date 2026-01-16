@@ -6,9 +6,7 @@ import hexlet.code.models.Url;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import hexlet.code.models.UrlCheck;
@@ -16,7 +14,7 @@ import hexlet.code.utils.Result;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-public class UrlService {
+public final class UrlService {
     private final UrlsRepository urlsRepository;
     private final UrlChecksRepository urlChecksRepository;
     public UrlService(UrlsRepository urlsRepository, UrlChecksRepository urlChecksRepository) {
@@ -42,23 +40,27 @@ public class UrlService {
     }
 
     public Result<UrlCheck> createUrlCheck(String htmlBody, Integer statusCode, Long urlId) {
-        if (htmlBody == null) {
-            return Result.failure("Не удалось проверить страницу");
-        }
+        // ✅ Пустая htmlBody = нормальная ситуация (сервер недоступен)
+        Document doc = Jsoup.parse(htmlBody != null ? htmlBody : "");
 
-        Document doc = Jsoup.parse(htmlBody);
-        String title = doc.title();
-        String h1 = Objects.requireNonNull(doc.selectFirst("h1")).text();
-        String description = doc.select("meta[name=description]").attr("content");
+        String title = doc.title(); // ""
+        String h1 = Optional.ofNullable(doc.selectFirst("h1"))
+                .map(el -> el.text())
+                .orElse(""); // ✅ Пустая строка вместо null!
+
+        String description = Optional.ofNullable(doc.selectFirst("meta[name=description]"))
+                .map(el -> el.attr("content"))
+                .orElse("");
 
         UrlCheck urlCheck = new UrlCheck(statusCode, title, h1, description, urlId);
         urlChecksRepository.save(urlCheck);
-        return Result.success(urlCheck, "Страница успешно проверенна");
+
+        return Result.success(urlCheck, "Страница успешно проверена");
     }
 
     public Optional<List<Url>> getAllUrls() {
-        var OptUrls = urlsRepository.getEntities();
-        OptUrls.ifPresent(urls -> urls
+        var optUrls = urlsRepository.getEntities();
+        optUrls.ifPresent(urls -> urls
                 .forEach(url -> {
                     var urlId = url.getId();
                     var check = urlChecksRepository.findLastCheckByUrlId(urlId);
@@ -69,7 +71,7 @@ public class UrlService {
                         url.setStatusCode(statusCode);
                     }
                 }));
-        return OptUrls;
+        return optUrls;
     }
 
     public Optional<Url> getUrlById(Long id) {
@@ -90,7 +92,9 @@ public class UrlService {
             if (uri.getScheme() == null || uri.getHost() == null) {
                 return null;
             }
-            return (uri.getPort() == -1) ? uri.getScheme() + "://" + uri.getHost() : uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
+            return (uri.getPort() == -1)
+                    ? uri.getScheme() + "://" + uri.getHost()
+                    : uri.getScheme() + "://" + uri.getHost() + ":" + uri.getPort();
         } catch (URISyntaxException e) {
             return null;
         }

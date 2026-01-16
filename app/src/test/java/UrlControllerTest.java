@@ -1,4 +1,3 @@
-import hexlet.code.App;
 import hexlet.code.Controllers.UrlController;
 import hexlet.code.Repository.UrlChecksRepository;
 import hexlet.code.Repository.UrlsRepository;
@@ -6,31 +5,23 @@ import hexlet.code.Services.UrlService;
 import hexlet.code.models.Url;
 import hexlet.code.utils.Result;
 import io.javalin.http.Context;
-import io.javalin.http.staticfiles.Location;
-import io.javalin.rendering.template.JavalinJte;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.*;
-
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.Map;
-import java.util.Optional;
-
-import static hexlet.code.App.createTemplateEngine;
-import static hexlet.code.App.getApp;
 import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import io.javalin.Javalin;
-import io.javalin.testtools.JavalinTest;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UrlControllerTest {
+public final class UrlControllerTest {
 
     @Mock
     private UrlsRepository urlsRepository;
@@ -68,10 +59,10 @@ public class UrlControllerTest {
 
     @ParameterizedTest
     @CsvSource({"https://google.com", "http://google.com", "https://google.com/adfb/",
-            "https://docs.gradle.org", "https://docs.gradle.org/current/userguide/declaring_repositories.html",
-            "https://docs.gradle.org/", "https://www.perplexity.ai/search/task-che"
+                "https://docs.gradle.org", "https://docs.gradle.org/current/userguide/declaring_repositories.html",
+                "https://docs.gradle.org/", "https://www.perplexity.ai/search/task-che"
     })
-    void testAddUrl_valid_urls(String testUrls) {
+    void testAddUrlValidUrls(String testUrls) {
         // Подготовка (Arrange) - создаем "подделки"
 
         // Настройка мока контекста - говорим ему, что пользователь ввел URL
@@ -98,10 +89,10 @@ public class UrlControllerTest {
 
     @ParameterizedTest
     @CsvSource({"google.com", "www.google.com", "httpswww.perplexity.ai/search/task-che",
-            "www.google", "https://google"
+                "www.google", "https://google"
 
     })
-    void testAddUrl_invalid_urls(String testUrls) {
+    void testAddUrlInvalidUrls(String testUrls) {
         // Настройка мока контекста - говорим ему, что пользователь ввел URL
         when(ctx.formParam("url")).thenReturn(testUrls);
 

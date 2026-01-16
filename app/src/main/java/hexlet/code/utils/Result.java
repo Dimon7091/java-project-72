@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 
-public class Result<T> {
+public final class Result<T> {
     private final boolean success;
     private final T data;
     private final String message;

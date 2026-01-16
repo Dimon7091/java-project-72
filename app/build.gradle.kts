@@ -8,6 +8,7 @@ plugins {
     kotlin("plugin.lombok") version "2.2.21"
     id("io.freefair.lombok") version "8.14.2"
     jacoco
+    checkstyle
 }
 
 

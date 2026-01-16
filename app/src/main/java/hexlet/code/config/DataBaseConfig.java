@@ -6,15 +6,13 @@ import hexlet.code.App;
 import hexlet.code.Repository.BaseRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class DataBaseConfig {
-    private static final Logger log = LoggerFactory.getLogger(DataBaseConfig.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataBaseConfig.class.getName());
 
     public static void init() {
         var hikariConfig = new HikariConfig();
@@ -30,12 +28,12 @@ public class DataBaseConfig {
         try (var connection = dataSource.getConnection()) {
             // 1. Простая проверка соединения
             if (connection.isValid(3)) { // 3 сек таймаут
-                log.info("✅ Connection is VALID");
+                LOGGER.info("✅ Connection is VALID");
             }
 
             // 2. Проверка метаданных БД
             var meta = connection.getMetaData();
-            log.info("✅ Connected to: {} v{} (driver: {})",
+            LOGGER.info("✅ Connected to: {} v{} (driver: {})",
                     meta.getDatabaseProductName(),
                     meta.getDatabaseProductVersion(),
                     meta.getDriverName());
@@ -44,20 +42,26 @@ public class DataBaseConfig {
             var sqlShema = parseSchema();
             try (var statement = connection.createStatement()) {
                 statement.execute(sqlShema);
-                log.info("✅ Schema applied successfully");
+                LOGGER.info("✅ Schema applied successfully");
             }
 
         } catch (SQLException e) {
-            log.error("❌ Database connection FAILED: {}", e.getMessage());
+            LOGGER.error("❌ Database connection FAILED: {}", e.getMessage());
             throw new RuntimeException("Cannot connect to database", e);
         }
 
         BaseRepository.dataSource = dataSource;
-        log.info("✅ HikariCP pool initialized");
+        LOGGER.info("✅ HikariCP pool initialized");
     }
 
     static String getUrl() {
         var url = System.getenv("JDBC_DATABASE_URL"); // Render DATABASE_URL
+
+        if (url != null && url.startsWith("jdbc:postgresql")) {
+            LOGGER.info("Using PostgreSQL JDBC URL: {}", url);
+            return url;
+        }
+
         if (url != null && url.contains("postgresql")) {
             // Парсим Render URL: postgresql://user:pass@host/db
             String cleanUrl = url.replace("postgresql://", "");
