@@ -1,6 +1,7 @@
 package hexlet.code.Repository;
 
 import hexlet.code.models.Url;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -13,9 +14,10 @@ import java.util.Optional;
 
 import static hexlet.code.Repository.BaseRepository.dataSource;
 
+@Slf4j
 public class UrlsRepository {
     public void save(Url url) {
-        var sql = "INSERT INTO urls (name) VALUES (?)";
+        var sql = "INSERT INTO urls (name, created_at) VALUES (?, NOW())";
         if (url.getId() == null) {
             try (var connection = dataSource.getConnection();
                  var preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -25,19 +27,12 @@ public class UrlsRepository {
                 var generatedKey = preparedStatement.getGeneratedKeys();
                 if (generatedKey.next()) {
                     url.setId(generatedKey.getLong(1));
+                    log.info("Созданна запись Url, id = {}:", generatedKey);
                 } else {
-                    System.out.println("DB have not returned an id after saving an entity");
+                    log.error("Не удалось создать запись Url");
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try (var connection = dataSource.getConnection();
-                 var preparedStatement = connection.prepareStatement(sql)) {
-                preparedStatement.setString(1, url.getName());
-                preparedStatement.executeUpdate();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+                log.error("Ошибка при создании записи UrlCheck");
             }
         }
     }

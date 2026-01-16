@@ -2,6 +2,7 @@ package hexlet.code.Repository;
 
 
 import hexlet.code.models.UrlCheck;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 import static hexlet.code.Repository.BaseRepository.dataSource;
 
+@Slf4j
 public class UrlChecksRepository {
     public void save(UrlCheck urlCheck) {
         var sql = "INSERT INTO url_checks (url_id,  status_code, h1, title, description) VALUES (?, ?, ?, ?, ?)";
@@ -28,11 +30,12 @@ public class UrlChecksRepository {
                 var generatedKey = preparedStatement.getGeneratedKeys();
                 if (generatedKey.next()) {
                     urlCheck.setId(generatedKey.getLong(1));
+                    log.info("Созданна запись UrlCheck, id = {}:", urlCheck.getId());
                 } else {
-                    System.out.println("DB have not returned an id after saving an entity");
+                    log.warn("Не удалось создать запись Url");
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+                log.error("Ошибка при создании записи UrlCheck");
             }
     }
 
@@ -90,11 +93,13 @@ public class UrlChecksRepository {
                 urlCheck.setId(checkId);
                 urlCheck.setCreatedAt(formattedDate);
 
+                log.info("Последняя запись UrlCheck, url_id = {}:, найдена", urlId);
                 return Optional.of(urlCheck);
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Ошибка при получении записи UrlCheck, url_id = {}: ", urlId);
         }
+        log.warn("Запись UrlCheck, url_id = {}:, не найдена!", urlId);
         return Optional.empty();
     }
 
@@ -124,10 +129,13 @@ public class UrlChecksRepository {
                 checksList.add(urlCheck);
             }
             if (checksList.isEmpty()) {
+                log.warn("Записи UrlCheck url_id {}: не найдены!", urlId);
                 return Optional.empty();
             }
+            log.info("Записи UrlCheck url_id {}: найдены", urlId);
             return Optional.of(checksList);
         } catch (SQLException e) {
+            log.error("Ошибка при получении записей UrlCheck url_id {}:", urlId);
             throw new RuntimeException(e);
         }
     }
