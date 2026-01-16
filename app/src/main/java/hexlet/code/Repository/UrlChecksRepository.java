@@ -2,6 +2,7 @@ package hexlet.code.Repository;
 
 
 import hexlet.code.models.UrlCheck;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 import static hexlet.code.Repository.BaseRepository.dataSource;
 
+@Slf4j
 public class UrlChecksRepository {
     public void save(UrlCheck urlCheck) {
         var sql = "INSERT INTO url_checks (url_id,  status_code, h1, title, description) VALUES (?, ?, ?, ?, ?)";
@@ -29,10 +31,10 @@ public class UrlChecksRepository {
                 if (generatedKey.next()) {
                     urlCheck.setId(generatedKey.getLong(1));
                 } else {
-                    System.out.println("DB have not returned an id after saving an entity");
+
                 }
             } catch (SQLException e) {
-                throw new RuntimeException(e);
+
             }
     }
 
@@ -90,11 +92,13 @@ public class UrlChecksRepository {
                 urlCheck.setId(checkId);
                 urlCheck.setCreatedAt(formattedDate);
 
+
                 return Optional.of(urlCheck);
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+
         }
+
         return Optional.empty();
     }
 
@@ -126,6 +130,7 @@ public class UrlChecksRepository {
             if (checksList.isEmpty()) {
                 return Optional.empty();
             }
+
             return Optional.of(checksList);
         } catch (SQLException e) {
             throw new RuntimeException(e);
