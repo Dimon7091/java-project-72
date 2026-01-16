@@ -58,6 +58,12 @@ public class DataBaseConfig {
 
     static String getUrl() {
         var url = System.getenv("JDBC_DATABASE_URL"); // Render DATABASE_URL
+
+        if (url != null && url.startsWith("jdbc:postgresql")) {
+            log.info("Using PostgreSQL JDBC URL: {}", url);
+            return url;
+        }
+
         if (url != null && url.contains("postgresql")) {
             // Парсим Render URL: postgresql://user:pass@host/db
             String cleanUrl = url.replace("postgresql://", "");

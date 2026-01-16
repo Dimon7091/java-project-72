@@ -15,7 +15,7 @@ import static hexlet.code.Repository.BaseRepository.dataSource;
 
 public class UrlsRepository {
     public void save(Url url) {
-        var sql = "INSERT INTO urls (name) VALUES (?)";
+        var sql = "INSERT INTO urls (name, created_at) VALUES (?, NOW())";
         if (url.getId() == null) {
             try (var connection = dataSource.getConnection();
                  var preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -28,14 +28,6 @@ public class UrlsRepository {
                 } else {
                     System.out.println("DB have not returned an id after saving an entity");
                 }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try (var connection = dataSource.getConnection();
-                 var preparedStatement = connection.prepareStatement(sql)) {
-                preparedStatement.setString(1, url.getName());
-                preparedStatement.executeUpdate();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
